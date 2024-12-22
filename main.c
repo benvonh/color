@@ -3,9 +3,24 @@
 
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+#define PRINT(s,c)  printf("%s : %d, %d, %d\n", s, c.r, c.g, c.b);
+#define MAX(a,b)    ((a) > (b) ? (a) : (b))
+#define MIN(a,b)    ((a) < (b) ? (a) : (b))
+
+typedef struct {
+  int r, g, b;
+} Color;
+
+Color ceil_color(Color const *c);
+Color floor_color(Color const *c);
+
+
+int main(int argc, char **argv)
+{
   if (argc != 2) {
     printf("usage: %s /path/to/image\n", argv[0]);
+    printf("\n  Generate a set of colors from an image");
+    printf("\n  to help theme your desktop environment.\n");
     return EXIT_FAILURE;
   }
 
@@ -17,23 +32,56 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+  Color sum = { 0 };
+
   int const area = w * h;
   int const size = area * 3;
 
-  unsigned r_sum = 0;
-  unsigned g_sum = 0;
-  unsigned b_sum = 0;
-
   for (unsigned char const *p = data; p != &data[size]; p += 3) {
-    r_sum += *(p);
-    g_sum += *(p + 1);
-    b_sum += *(p + 2);
+    sum.r += *(p);
+    sum.g += *(p + 1);
+    sum.b += *(p + 2);
   }
 
-  int const r_avg = r_sum / area;
-  int const g_avg = g_sum / area;
-  int const b_avg = b_sum / area;
+  Color const average = {
+    .r = sum.r / area,
+    .g = sum.g / area,
+    .b = sum.b / area
+  };
 
-  printf("%d, %d, %d\n", r_avg, g_avg, b_avg);
+  Color const ceil = ceil_color(&average);
+  Color const floor = floor_color(&average);
+
+  PRINT("average", average);
+  PRINT("ceiling", ceil);
+  PRINT("floor", floor);
   return EXIT_SUCCESS;
+}
+
+
+Color ceil_color(Color const *c)
+{
+  int max = MAX(MAX(c->r, c->g), c->b);
+
+  Color color = {
+    .r = 255 - max + c->r,
+    .g = 255 - max + c->g,
+    .b = 255 - max + c->b
+  };
+
+  return color;
+}
+
+
+Color floor_color(Color const *c)
+{
+  int min = MIN(MIN(c->r, c->g), c->b);
+
+  Color color = {
+    .r = c->r - min,
+    .g = c->g - min,
+    .b = c->b - min
+  };
+
+  return color;
 }
