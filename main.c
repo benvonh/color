@@ -3,12 +3,14 @@
 
 #include <stdio.h>
 
-#define PRINT(s,c)  printf("%s : %d, %d, %d\n", s, c.r, c.g, c.b);
-#define MAX(a,b)    ((a) > (b) ? (a) : (b))
-#define MIN(a,b)    ((a) < (b) ? (a) : (b))
+#define RGB2HEX(c)  snprintf(c.hex, 8, "#%02X%02X%02X", c.r, c.g, c.b);
+#define PRINT(s,c)  printf("%s : %d, %d, %d (%s)\n", s, c.r, c.g, c.b, c.hex);
+#define MAX(a,b)      ((a) > (b) ? (a) : (b))
+#define MIN(a,b)      ((a) < (b) ? (a) : (b))
 
 typedef struct {
   int r, g, b;
+  char hex[8];
 } Color;
 
 Color ceil_color(Color const *c);
@@ -43,11 +45,13 @@ int main(int argc, char **argv)
     sum.b += *(p + 2);
   }
 
-  Color const average = {
+  Color average = {
     .r = sum.r / area,
     .g = sum.g / area,
     .b = sum.b / area
   };
+
+  RGB2HEX(average);
 
   Color const ceil = ceil_color(&average);
   Color const floor = floor_color(&average);
@@ -69,6 +73,8 @@ Color ceil_color(Color const *c)
     .b = 255 - max + c->b
   };
 
+  RGB2HEX(color);
+
   return color;
 }
 
@@ -82,6 +88,8 @@ Color floor_color(Color const *c)
     .g = c->g - min,
     .b = c->b - min
   };
+
+  RGB2HEX(color);
 
   return color;
 }
